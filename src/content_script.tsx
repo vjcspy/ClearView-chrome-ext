@@ -25,6 +25,11 @@
  */
 import {chatgptCleaner} from "./cleaner/chatgpt.cleaner";
 import {notegptCleaner} from "./cleaner/notegpt.cleaner";
+import {geminiCleaner} from "./cleaner/gemini.cleaner";
+import {setBodyColor} from "./cleaner/utils";
+
+// At the top of the file, add this variable to track the interval
+let geminiCleanerInterval: number | null = null;
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Message", message, sender, sendResponse);
@@ -35,10 +40,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       const currentURL = message.payload.currentURL;
 
       if(currentURL.includes("chatgpt.com")) {
+        console.log("chatgpt.com");
         chatgptCleaner();
       }else if(currentURL.includes("notegpt.io")) {
+        console.log("notegpt.io");
         notegptCleaner();
-      }
+      } else if(currentURL.includes("gemini.google.com")) {
+        console.log("gemini.google.com");
+        setBodyColor("#0C1018");
+        geminiCleaner();
+        if (!geminiCleanerInterval) {
+            geminiCleanerInterval = setInterval(geminiCleaner, 1000 * 3);
+        }
+    }
 
       sendResponse({ status: "done" });
     }
